@@ -1,0 +1,72 @@
+# Publishes a firmware build to a GitHub release.
+#
+# Only a tag triggers it, and only a tag whose commit is on main or master: a
+# tag pushed from a side branch would otherwise cut a release of code that was
+# never merged, and nothing about the tag itself says which branch it came
+# from.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write        # to create the release and attach the .uf2 to it
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the tag
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive   # lib/sd_fatfs, without which CMake stops
+          fetch-depth: 0          # the branch check needs history, not a shallow tip
+
+      - name: Refuse a tag that is not on main or master
+        run: |
+          set -euo pipefail
+
+          # A tag checkout does not necessarily bring the branches with it.
+          git fetch --quiet --unshallow origin 2>/dev/null || true
+          git fetch --quiet origin '+refs/heads/*:refs/remotes/origin/*'
+
+          for branch in origin/main origin/master; do
+            if git rev-parse --verify --quiet "$branch" >/dev/null &&
+               git merge-base --is-ancestor "$GITHUB_SHA" "$branch"; then
+              echo "$GITHUB_REF_NAME is on $branch"
+              exit 0
+            fi
+          done
+
+          echo "::error::$GITHUB_REF_NAME is not on main or master; not releasing"
+          exit 1
+
+      - name: Build the toolchain image
+        run: docker build -t rfp-usb-build .
+
+      - name: Build the firmware
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --volume "$PWD:/src" \
+            rfp-usb-build \
+            tools/build-firmware.sh
+
+      - name: Name the artefact after the tag
+        run: |
+          set -euo pipefail
+          cp build/rfp-usb.uf2 "rfp-usb-${GITHUB_REF_NAME}.uf2"
+          ls -l "rfp-usb-${GITHUB_REF_NAME}.uf2"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            "rfp-usb-${GITHUB_REF_NAME}.uf2"

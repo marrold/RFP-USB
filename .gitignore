@@ -1,0 +1,9 @@
+build/
+# Compiled test harnesses. Nothing builds here any more -- run_tests.sh
+# and render_screens.sh both work in a temp dir -- but compiling one by
+# hand while hacking on it is natural, and one of these was committed by
+# accident once already.
+tests/host/test_rfp
+tests/host/render_screens
+*.img
+*.uf2

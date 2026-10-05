@@ -1,0 +1,7 @@
+# The image carries no source -- the tree is mounted at run time -- so nothing
+# here needs to reach the build context.
+.git
+build
+docs
+tests
+lib
