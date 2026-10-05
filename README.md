@@ -80,7 +80,9 @@ It takes effect on the *next* boot, after selecting the mode.
 
 ## Screen Renders
 
-[![Screen Renders](docs/screens/all-screens.png)](docs/screens/all-screens.png)
+<a href="docs/screens/all-screens.png">
+  <img src="docs/screens/all-screens.png" alt="Screen renders" width="600">
+</a>
 
 ## License
 
