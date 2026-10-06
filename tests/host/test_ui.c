@@ -334,12 +334,14 @@ static int scene_menu(void) {
     check(has_text_colour(COL_WHITE), "the selected mode is picked out");
     check(has_text_colour(COL_GREY), "and the others are not");
 
-    /* The build's version has the bar's right-hand slot. Right-aligned text
-     * grows leftwards, so the thing worth checking is not that it is there but
-     * that the longest one the convention allows still leaves the mode label
-     * alone -- the two meeting in the middle is the only way this breaks. */
-    check(bar_ink_between(LCD_W / 2, LCD_W), "the version is on the bar");
-    check(!bar_ink_between(64, 96), "and clear of the word MODE");
+    /* The bar carries the board on the left and the build's version on the
+     * right. Right-aligned text grows leftwards, so what is worth checking is
+     * not that each is there but that the longest version the convention
+     * allows still clears the label -- the two meeting in the middle is the
+     * only way this breaks. */
+    check(bar_ink_between(0, 64), "the board is on the bar");
+    check(bar_ink_between(LCD_W / 2, LCD_W), "and the version beside it");
+    check(!bar_ink_between(64, 96), "with the two clear of each other");
 
     ui_close_menu();
     ui_tick();

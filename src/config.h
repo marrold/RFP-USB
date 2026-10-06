@@ -132,15 +132,35 @@
 #define RFP_VERSION             "dev"
 #endif
 
-/* What the bar's right-hand slot holds at 1.5x once "MODE" has had the left:
- * 12 glyphs, against a tagging convention of at most 11 ("vXX.XX-RCXX") plus
- * room for the marker a build that is not exactly on a tag carries.
+/* Which GEEK this build is for, in the menu bar's left-hand slot. Between them
+ * the two slots answer "what is on this stick" without a host to ask: which
+ * board the .uf2 was for, and which release it came from.
+ *
+ * Taken from the chip the SDK says it is compiling for rather than from
+ * anything CMake passes alongside, so it cannot end up disagreeing with the
+ * binary it is sitting in. Neither macro is defined when the host harnesses
+ * compile this, and 2040 is what the reference board reads, so that is the way
+ * the fallback goes; -DBOARD_LABEL overrides it either way. */
+#ifndef BOARD_LABEL
+#  if defined(PICO_RP2350)
+#    define BOARD_LABEL         "2350"
+#  else
+#    define BOARD_LABEL         "2040"
+#  endif
+#endif
+
+/* What the bar's right-hand slot holds at 1.5x once the board label has had
+ * the left: 12 glyphs, against a tagging convention of at most 11
+ * ("vXX.XX-RCXX") plus room for the marker a build that is not exactly on a
+ * tag carries. The label is four glyphs, as the word it replaced was, so the
+ * two still clear each other by a comfortable margin.
  *
  * Held rather than truncated. A right-aligned field overflows leftwards, so an
  * over-long version would run off the left edge of the panel and show its tail
  * -- which reads as a different build. Refusing to compile is the only honest
- * answer: shorten the tag, or widen the slot and re-check it against "MODE".
- * CMake keeps the development string short on purpose; see RFP_VERSION there. */
+ * answer: shorten the tag, or widen the slot and re-check it against the
+ * label. CMake keeps the development string short on purpose; see RFP_VERSION
+ * there. */
 #define VERSION_COLS            12
 
 _Static_assert(sizeof RFP_VERSION - 1 <= VERSION_COLS,
