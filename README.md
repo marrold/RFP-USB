@@ -1,7 +1,7 @@
 
 # RFP-USB
 
-Firmware for the Waveshare RP2040-GEEK and RP2350-GEEK to turn either into a tool for recovering, resetting and upgrading 3rd Gen Mitel DECT RFPs, including the 35 and 43.
+Firmware to turn a Waveshare RP2040-GEEK / RP2350-GEEK into a tool for recovering, resetting and upgrading *3rd Gen* Mitel DECT RFPs, i.e the 35, 36, 37 & 43.
 
 **Disclaimer:** RFP-USB has been developed with AI, but meticulously tested by a human.  
 
@@ -16,7 +16,7 @@ Well, why not stick `uImageFailSafe`, `iprfp3G.dnld` and `factoryReset` on a USB
 1) Use a PC to add the `factoryReset` file to the USB stick  
 2) Insert it into the RFP  
 3) The RFP boots from `uImageFailSafe` which is slower than flash  
-4) It finds the `factoryReset` file, deletes it, resets, and reboots  
+4) It finds the `factoryReset` file, *deletes* it, resets, and reboots  
 5) It slowly boots from `uImageFailSafe` again  
 6) It flashes its firmware from `iprfp3G.dnld`
 
