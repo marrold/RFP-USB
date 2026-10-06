@@ -58,11 +58,13 @@ if [ -z "${PICO_SDK_PATH:-}" ]; then
     exit 1
 fi
 
-# The SD driver is vendored under lib/, but a tree where it is missing gives a
+# The SD driver is vendored under lib/ -- committed in full, not a submodule --
+# so a clone always has it. Checked anyway because a tree without it gives a
 # CMake error that is not obviously about that.
 if [ ! -f "$root/lib/sd_fatfs/src/CMakeLists.txt" ]; then
-    echo "lib/sd_fatfs is empty. Run:" >&2
-    echo "    git submodule update --init --recursive" >&2
+    echo "lib/sd_fatfs is missing. It is vendored, so this is not a submodule" >&2
+    echo "that needs initialising -- re-clone, or restore it with:" >&2
+    echo "    git checkout -- lib/sd_fatfs" >&2
     exit 1
 fi
 

@@ -94,4 +94,6 @@ This will output `build/rfp-usb-2040.uf2` and `build/rfp-usb-2350.uf2`. Pass `20
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
+
+For bundled libraries see [THIRD-PARTY.md](THIRD-PARTY.md)

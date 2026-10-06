@@ -23,7 +23,8 @@ jobs:
       - name: Check out the tag
         uses: actions/checkout@v4
         with:
-          submodules: recursive   # lib/sd_fatfs, without which CMake stops
+          # lib/sd_fatfs is vendored rather than a submodule, so there is
+          # nothing to initialise; a plain checkout already has it.
           fetch-depth: 0          # the branch check needs history, not a shallow tip
 
       - name: Refuse a tag that is not on main or master

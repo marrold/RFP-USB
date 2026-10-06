@@ -47,7 +47,12 @@ static uint32_t now_ms(void) { return to_ms_since_boot(get_absolute_time()); }
  * the boot ROM and never reaches this firmware.
  */
 
-/* SIO's HI GPIO registers observe the six QSPI pins on both chips, but not in
+/* The register sequence below follows Raspberry Pi's published example for
+ * sampling BOOTSEL -- pico-examples' picoboard/button and TinyUSB's rp2040
+ * board support both do it this way. Copyright (c) 2020 Raspberry Pi (Trading)
+ * Ltd., BSD-3-Clause; see THIRD-PARTY.md.
+ *
+ * SIO's HI GPIO registers observe the six QSPI pins on both chips, but not in
  * the same layout: on the RP2040 chip select is bit 1, and on the RP2350 the
  * QSPI pins sit at the top of the word alongside the USB ones. The index into
  * io_qspi is 1 either way. */
