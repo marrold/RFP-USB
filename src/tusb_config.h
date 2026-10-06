@@ -29,7 +29,7 @@
 #define CFG_TUD_MIDI            0
 #define CFG_TUD_VENDOR          0
 
-/* One sector per callback. The RP2040's full-speed USB tops out around
- * 1 MB/s, well under what the card can supply, so a larger buffer would buy
+/* One sector per callback. Full-speed USB tops out around 1 MB/s on either
+ * chip, well under what the card can supply, so a larger buffer would buy
  * nothing but SRAM. */
 #define CFG_TUD_MSC_EP_BUFSIZE  512

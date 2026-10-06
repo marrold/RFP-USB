@@ -1,10 +1,9 @@
 
 # RFP-USB
 
-Firmware for the Waveshare RP2040-GEEK to turn it into a tool for recovering, resetting and upgrading 3rd Gen Mitel DECT RFPs, like the RFP 35.
+Firmware for the Waveshare RP2040-GEEK and RP2350-GEEK to turn either into a tool for recovering, resetting and upgrading 3rd Gen Mitel DECT RFPs, like the RFP 35.
 
 **Disclaimer:** RFP-USB has been developed with AI, but meticulously tested by a human.  
-**Other Disclaimer:** It turns out the new and improved RP2350-GEEK is the same price, if not cheaper than the RP2040-GEEK, but it's untested. I will test one in the coming days, so don't rush out and buy the old model yet.
 
 ## Why?
 
@@ -27,13 +26,13 @@ RFP-USB attempts to streamline this process by tracking the state (as best it ca
 
 ## Requirements
 
-- A Waveshare RP2040-GEEK
+- A Waveshare RP2040-GEEK or RP2350-GEEK
 - An SD card with a <4GB partition, formatted with FAT32
 
 ## Installing / Upgrading
 
-1) Grab the latest `.uf2` from the [GitHub releases page](https://github.com/marrold/RFP-USB/releases)
-2) Insert the RP2040-GEEK into the computer whilst pressing and holding the BOOT button, and keep it held for a few seconds.  
+1) Grab the `.uf2` for your board from the [GitHub releases page](https://github.com/marrold/RFP-USB/releases)
+2) Insert the USB into the computer whilst pressing and holding the BOOT button, and keep it held for a few seconds.  
 3) It should then present itself as USB Mass Storage  
 4) Drop the `.uf2` file onto the USB. It will reboot automatically and start running the RFP-USB firmware
 
@@ -77,6 +76,18 @@ It takes effect on the *next* boot, after selecting the mode.
 5) With the RFP powered off, insert the USB.  
 6) Power up the RFP  
 7) Let it do its thing until the display turns green and shows "DONE"
+
+## Building
+
+Both variants, in Docker, which is exactly what the release workflow does:
+
+```sh
+docker build -t rfp-usb-build .
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/src" rfp-usb-build \
+    tools/build-firmware.sh
+```
+
+That leaves `build/rfp-usb-2040.uf2` and `build/rfp-usb-2350.uf2`. Pass `2040` or `2350` to the script to build just one. To build against your own SDK instead, set `PICO_SDK_PATH` and run the same script.
 
 ## Screen Renders
 

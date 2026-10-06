@@ -7,8 +7,14 @@
 #pragma once
 
 /* ------------------------------------------------------------------ board */
-/* Waveshare RP2040-GEEK. LCD and SD are on different SPI peripherals, so
- * there is no bus arbitration to worry about. */
+/* Waveshare RP2040-GEEK and RP2350-GEEK. The two are pin-for-pin identical --
+ * checked against both schematics -- so one set of numbers serves both, and
+ * which chip is being built for is settled entirely by PICO_BOARD. The only
+ * place the chips differ in this firmware is how the BOOT button is sampled;
+ * see bootsel_pressed() in main.c.
+ *
+ * LCD and SD are on different SPI peripherals, so there is no bus arbitration
+ * to worry about. */
 
 #define LCD_SPI         spi1
 #define LCD_PIN_SCK     10
@@ -17,6 +23,11 @@
 #define LCD_PIN_DC       8
 #define LCD_PIN_RST     12
 #define LCD_PIN_BL      25
+/* The panel's minimum write cycle is 16 ns, so this is the ceiling rather than
+ * a target. spi_set_baudrate only ever rounds down, which lands it on 62.5 MHz
+ * on the RP2040 (125 MHz peripheral clock) and 37.5 MHz on the RP2350
+ * (150 MHz): the screen is redrawn a few small regions at a time, ten times a
+ * second, so neither is anywhere near being the limit. */
 #define LCD_SPI_BAUD    (62500 * 1000)
 
 #define SD_SPI          spi0
@@ -25,7 +36,8 @@
 #define SD_PIN_MISO     20
 #define SD_PIN_CS       23
 /* Cards negotiate down from this during init; 12.5 MHz is a safe ceiling for
- * the GEEK's unshielded card slot and still outruns full-speed USB. */
+ * the GEEK's unshielded card slot and still outruns full-speed USB. Both
+ * peripheral clocks divide onto it exactly. */
 #define SD_SPI_BAUD     (12500 * 1000)
 
 /* The 1.14" 240x135 panel is a window into a 240x320 ST7789 framebuffer. */
@@ -109,9 +121,10 @@
 
 /* ------------------------------------------------------------------- USB */
 
-/* 0x2E8A is Raspberry Pi's vendor ID; 0x000A is their reserved range for
- * "RP2040 user-supplied device". Replace both if a target demands a
- * particular identity. */
+/* 0x2E8A is Raspberry Pi's vendor ID; 0x000A is their reserved range for a
+ * user-supplied device. Deliberately the same on both boards: the identity the
+ * target sees should not depend on which GEEK the firmware is running on.
+ * Replace both if a target demands a particular identity. */
 #define USB_VID                 0x2E8A
 #define USB_PID                 0x000A
 #define USB_BCD_DEVICE          0x0100

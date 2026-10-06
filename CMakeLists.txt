@@ -1,5 +1,33 @@
 cmake_minimum_required(VERSION 3.13)
 
+# Which GEEK to build for. The two boards are pin-for-pin identical -- see the
+# board section of src/config.h -- so naming the board header is almost all it
+# takes: the SDK reads the chip, the flash size and the UART pinout out of it.
+#
+#   cmake -B build/2040 -DPICO_BOARD=waveshare_rp2040_geek
+#   cmake -B build/2350 -DPICO_BOARD=waveshare_rp2350_geek
+#
+# tools/build-firmware.sh does both. Note that PICO_BOARD has to be settled
+# before the SDK is imported, because importing it is what picks the platform
+# and therefore the compiler flags.
+if (NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD waveshare_rp2040_geek CACHE STRING "Target board")
+endif()
+
+# A short suffix for the artefacts. The two .uf2 files are not interchangeable
+# and nothing but the filename tells them apart once they are downloaded, so
+# the chip goes in the name rather than in the directory it was built in.
+if (PICO_BOARD STREQUAL "waveshare_rp2040_geek")
+    set(RFP_VARIANT 2040)
+elseif (PICO_BOARD STREQUAL "waveshare_rp2350_geek")
+    set(RFP_VARIANT 2350)
+else()
+    message(FATAL_ERROR
+        "PICO_BOARD=${PICO_BOARD} is not a board this firmware knows. Use "
+        "waveshare_rp2040_geek or waveshare_rp2350_geek: the pin assignments "
+        "in src/config.h are specific to them.")
+endif()
+
 include(pico_sdk_import.cmake)
 
 project(rfp_usb C CXX ASM)
@@ -42,16 +70,15 @@ target_link_libraries(rfp-usb
     no-OS-FatFS-SD-SDIO-SPI-RPi-Pico
 )
 
-# The GEEK brings UART1 out on the 3-pin connector (GP4/GP5). stdio must not
-# go over USB: the USB device is ours, and must stay silent until the boot
-# window has closed.
-target_compile_definitions(rfp-usb PRIVATE
-    PICO_DEFAULT_UART=1
-    PICO_DEFAULT_UART_TX_PIN=4
-    PICO_DEFAULT_UART_RX_PIN=5
-)
-
+# stdio must not go over USB: the USB device is ours, and must stay silent
+# until the boot window has closed. Both GEEKs bring UART1 out on the 3-pin
+# connector (GP4/GP5), and both board headers already make that the default
+# UART, so there is nothing to override here.
 pico_enable_stdio_usb(rfp-usb 0)
 pico_enable_stdio_uart(rfp-usb 1)
+
+# rfp-usb-2040.uf2 / rfp-usb-2350.uf2. pico_add_uf2_output honours OUTPUT_NAME,
+# so this has to be set before the outputs are added.
+set_target_properties(rfp-usb PROPERTIES OUTPUT_NAME rfp-usb-${RFP_VARIANT})
 
 pico_add_extra_outputs(rfp-usb)

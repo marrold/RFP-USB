@@ -1,4 +1,4 @@
-/* ST7789V driver for the RP2040-GEEK's 1.14" 240x135 IPS panel.
+/* ST7789V driver for the GEEK's 1.14" 240x135 IPS panel.
  *
  * There is no full framebuffer: 240x135 at 16bpp would cost 63 KB, which is
  * better spent on the copy-on-write overlay. Text is composed one 8x16 row

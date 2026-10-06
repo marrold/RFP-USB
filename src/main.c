@@ -1,4 +1,5 @@
-/* rfp-usb -- a factory-reset / file-serving USB stick for the RP2040-GEEK.
+/* rfp-usb -- a factory-reset / file-serving USB stick for the Waveshare
+ * RP2040-GEEK and RP2350-GEEK.
  *
  * The stick presents an SD card to a target over USB, showing it only the
  * files the current mode calls for. The host may delete what it is shown --
@@ -45,6 +46,17 @@ static uint32_t now_ms(void) { return to_ms_since_boot(get_absolute_time()); }
  * Note this only works after startup: BOOT held at power-on is caught by
  * the boot ROM and never reaches this firmware.
  */
+
+/* SIO's HI GPIO registers observe the six QSPI pins on both chips, but not in
+ * the same layout: on the RP2040 chip select is bit 1, and on the RP2350 the
+ * QSPI pins sit at the top of the word alongside the USB ones. The index into
+ * io_qspi is 1 either way. */
+#ifdef PICO_RP2040
+#define BOOTSEL_CS_IN_BIT (1u << 1)
+#else
+#define BOOTSEL_CS_IN_BIT SIO_GPIO_HI_IN_QSPI_CSN_BITS
+#endif
+
 static bool __no_inline_not_in_flash_func(bootsel_pressed)(void) {
     const uint CS_PIN_INDEX = 1;
 
@@ -57,7 +69,7 @@ static bool __no_inline_not_in_flash_func(bootsel_pressed)(void) {
     /* Let the line settle; it is pulled up through the flash chip. */
     for (volatile int i = 0; i < 1000; i++) continue;
 
-    bool pressed = !(sio_hw->gpio_hi_in & (1u << CS_PIN_INDEX));
+    bool pressed = !(sio_hw->gpio_hi_in & BOOTSEL_CS_IN_BIT);
 
     hw_write_masked(&ioqspi_hw->io[CS_PIN_INDEX].ctrl,
                     GPIO_OVERRIDE_NORMAL << IO_QSPI_GPIO_QSPI_SS_CTRL_OEOVER_LSB,
@@ -144,7 +156,7 @@ static void reattach_usb(void) {
 /* Hands the card to the host read-write, at once rather than at the next boot.
  *
  * Rebooting and picking the mode on the way up would be less code, but BOOT is
- * still held down at that moment and the RP2040's boot ROM samples it on every
+ * still held down at that moment and the boot ROM samples it on every
  * reset, watchdog resets included -- the chip would come back up in its USB
  * bootloader rather than in this firmware.
  *

@@ -1,4 +1,5 @@
-# Publishes a firmware build to a GitHub release.
+# Publishes the firmware builds to a GitHub release: one .uf2 per GEEK, named
+# so that a download tells you which board it is for.
 #
 # Only a tag triggers it, and only a tag whose commit is on main or master: a
 # tag pushed from a side branch would otherwise cut a release of code that was
@@ -12,7 +13,7 @@ on:
       - 'v*'
 
 permissions:
-  contents: write        # to create the release and attach the .uf2 to it
+  contents: write        # to create the release and attach the .uf2 files to it
 
 jobs:
   release:
@@ -47,19 +48,25 @@ jobs:
       - name: Build the toolchain image
         run: docker build -t rfp-usb-build .
 
-      - name: Build the firmware
+      - name: Build the firmware for both boards
         run: |
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             --volume "$PWD:/src" \
             rfp-usb-build \
-            tools/build-firmware.sh
+            tools/build-firmware.sh 2040 2350
 
-      - name: Name the artefact after the tag
+      # A release that quietly went out with one of the two missing would be
+      # worse than one that failed, so both are required by name rather than
+      # globbed for.
+      - name: Name the artefacts after the tag
         run: |
           set -euo pipefail
-          cp build/rfp-usb.uf2 "rfp-usb-${GITHUB_REF_NAME}.uf2"
-          ls -l "rfp-usb-${GITHUB_REF_NAME}.uf2"
+          for variant in 2040 2350; do
+            cp "build/rfp-usb-$variant.uf2" \
+               "rfp-usb-$variant-${GITHUB_REF_NAME}.uf2"
+          done
+          ls -l rfp-usb-*-"${GITHUB_REF_NAME}".uf2
 
       - name: Publish the release
         env:
@@ -69,4 +76,5 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             --title "$GITHUB_REF_NAME" \
             --generate-notes \
-            "rfp-usb-${GITHUB_REF_NAME}.uf2"
+            "rfp-usb-2040-${GITHUB_REF_NAME}.uf2" \
+            "rfp-usb-2350-${GITHUB_REF_NAME}.uf2"
