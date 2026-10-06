@@ -23,6 +23,10 @@
 # container build from colliding with a host one: a CMake cache remembers the
 # absolute paths it was configured with, and the two disagree about where the
 # SDK lives.
+#
+# RFP_VERSION is what the firmware calls itself on the mode menu. The release
+# workflow sets it to the tag, so the string on the screen and the string in
+# the artefact's filename cannot drift apart. Left unset, CMake asks git.
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -78,9 +82,17 @@ for variant in "${variants[@]}"; do
         rm -rf "$dir"
     fi
 
+    # Passed only when it is set, so that an unset RFP_VERSION leaves CMake to
+    # ask git rather than being handed an empty string to believe.
+    version_arg=()
+    if [ -n "${RFP_VERSION:-}" ]; then
+        version_arg=(-DRFP_VERSION="$RFP_VERSION")
+    fi
+
     cmake -S "$root" -B "$dir" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DPICO_BOARD="$board"
+        -DPICO_BOARD="$board" \
+        "${version_arg[@]}"
     cmake --build "$dir" -j "$(nproc)"
 
     cp "$dir/rfp-usb-$variant.uf2" "$build/rfp-usb-$variant.uf2"

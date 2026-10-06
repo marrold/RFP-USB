@@ -28,6 +28,47 @@ else()
         "in src/config.h are specific to them.")
 endif()
 
+# What the build calls itself, for the mode menu and for `picotool info`.
+#
+# A release passes the tag it is cutting, so the string on the screen is the
+# same string as the one in the artefact's filename rather than a second guess
+# at it. Anything else asks git, and falls back to "dev" where there is no git
+# to ask -- a bare tarball, say.
+#
+# Settled at configure time, so a build that is rebuilt without reconfiguring
+# keeps the string it was configured with.
+#
+# The nearest tag, not everything `git describe` would say: the commit count
+# and hash it appends are longer than the screen can hold, and what is worth
+# knowing on a 12-character readout is which release this build is near, not
+# how far past it. Anything that is not exactly that tag with a clean tree gets
+# a trailing +, so a development build is never read as the release itself.
+if (NOT DEFINED RFP_VERSION)
+    execute_process(
+        COMMAND git describe --tags --abbrev=0
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+        OUTPUT_VARIABLE RFP_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET)
+
+    execute_process(
+        COMMAND git describe --tags --exact-match --dirty=+
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+        OUTPUT_VARIABLE RFP_VERSION_EXACT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET)
+
+    if (NOT RFP_VERSION_EXACT STREQUAL RFP_VERSION)
+        set(RFP_VERSION "${RFP_VERSION}+")
+    endif()
+endif()
+
+# No tags to describe, or no git at all -- a bare tarball, say.
+if (NOT RFP_VERSION)
+    set(RFP_VERSION "dev")
+endif()
+message(STATUS "Firmware version: ${RFP_VERSION}")
+
 include(pico_sdk_import.cmake)
 
 project(rfp_usb C CXX ASM)
@@ -57,6 +98,15 @@ add_executable(rfp-usb
 )
 
 target_include_directories(rfp-usb PRIVATE src)
+
+# src/config.h carries a "dev" fallback for the host harnesses, which compile
+# the same sources without a build system; this is what a real build uses.
+target_compile_definitions(rfp-usb PRIVATE RFP_VERSION="${RFP_VERSION}")
+
+# Puts the same string in the binary's info block, so `picotool info` on a
+# board reports which build is actually on it -- the screen is the operator's
+# answer to that question, this is the one you can ask over USB.
+pico_set_program_version(rfp-usb "${RFP_VERSION}")
 
 target_link_libraries(rfp-usb
     pico_stdlib

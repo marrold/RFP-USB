@@ -16,7 +16,18 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
+# The mode menu shows the build's version, which CMake normally supplies.
+# Rendered against the nearest tag so the gallery shows the shape of what an
+# operator reads, rather than the "dev" fallback src/config.h carries for a
+# harness with no build system behind it.
+version_def=()
+version="$(git -C "$root" describe --tags --abbrev=0 2>/dev/null || true)"
+if [ -n "$version" ]; then
+    version_def=(-DRFP_VERSION="\"$version\"")
+fi
+
 gcc -std=c11 -Wall -Wextra -Werror -O1 \
+    "${version_def[@]}" \
     -I"$root/src" -I"$root/tests/host/fake_pico" -o "$work/render" \
     "$root/tests/host/render_screens.c" "$root/tests/host/fake_panel.c" \
     "$root/src/ui.c" "$root/src/st7789.c" "$root/src/modes.c"

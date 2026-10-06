@@ -92,6 +92,15 @@ static bool bar_has_rule(void) {
     return true;
 }
 
+/* Whether any of the bar's text ink falls in [x0, x1). The menu's bar is black
+ * on blue, so its ink is the one colour nothing else in that band uses. */
+static bool bar_ink_between(int x0, int x1) {
+    for (int x = x0; x < x1; x++)
+        for (int y = 0; y < BAR_H; y++)
+            if (fake_panel_pixel(x, y) == COL_BLACK) return true;
+    return false;
+}
+
 /* The x of the leftmost lit pixel in a row, which is where its text actually
  * begins -- not where its glyph cell does. */
 static int row_ink_x(int i) {
@@ -324,6 +333,13 @@ static int scene_menu(void) {
     check(!screen_is_green(), "the menu is not the finished screen");
     check(has_text_colour(COL_WHITE), "the selected mode is picked out");
     check(has_text_colour(COL_GREY), "and the others are not");
+
+    /* The build's version has the bar's right-hand slot. Right-aligned text
+     * grows leftwards, so the thing worth checking is not that it is there but
+     * that the longest one the convention allows still leaves the mode label
+     * alone -- the two meeting in the middle is the only way this breaks. */
+    check(bar_ink_between(LCD_W / 2, LCD_W), "the version is on the bar");
+    check(!bar_ink_between(64, 96), "and clear of the word MODE");
 
     ui_close_menu();
     ui_tick();

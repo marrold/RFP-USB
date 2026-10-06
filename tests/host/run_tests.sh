@@ -91,7 +91,11 @@ PYFAT
 
 echo
 echo "== building the screen test harness =="
+# Built with the longest version string the tagging convention allows, so the
+# menu test is checking the case that could actually collide with "MODE"
+# rather than the short fallback src/config.h carries.
 gcc -std=c11 -Wall -Wextra -Werror -O1 \
+    -DRFP_VERSION='"v12.34-RC56"' \
     -I"$src" -I"$here/fake_pico" -o "$work/test_ui" \
     "$here/test_ui.c" "$here/fake_panel.c" "$src/ui.c" "$src/st7789.c" \
     "$src/modes.c"

@@ -48,11 +48,17 @@ jobs:
       - name: Build the toolchain image
         run: docker build -t rfp-usb-build .
 
+      # The tag is handed to the build rather than left for it to work out, so
+      # that the version the mode menu shows is the same string as the one in
+      # the filenames below instead of a second, independent guess at it.
       - name: Build the firmware for both boards
+        env:
+          RFP_VERSION: ${{ github.ref_name }}
         run: |
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             --volume "$PWD:/src" \
+            --env RFP_VERSION \
             rfp-usb-build \
             tools/build-firmware.sh 2040 2350
 

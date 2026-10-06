@@ -119,6 +119,33 @@
  * card is normally one run; fragmented files just lose some LBA coverage. */
 #define MAX_EXTENTS_PER_FILE    8
 
+/* --------------------------------------------------------------- version */
+
+/* What the build calls itself, shown in the mode menu. CMake supplies it: a
+ * release passes the tag it is cutting, so the string on the screen and the
+ * name of the .uf2 it came out of are the same string by construction; any
+ * other build asks `git describe`.
+ *
+ * The fallback is for the host harnesses under tests/, which compile ui.c with
+ * a bare gcc line and have no build system to pass it. */
+#ifndef RFP_VERSION
+#define RFP_VERSION             "dev"
+#endif
+
+/* What the bar's right-hand slot holds at 1.5x once "MODE" has had the left:
+ * 12 glyphs, against a tagging convention of at most 11 ("vXX.XX-RCXX") plus
+ * room for the marker a build that is not exactly on a tag carries.
+ *
+ * Held rather than truncated. A right-aligned field overflows leftwards, so an
+ * over-long version would run off the left edge of the panel and show its tail
+ * -- which reads as a different build. Refusing to compile is the only honest
+ * answer: shorten the tag, or widen the slot and re-check it against "MODE".
+ * CMake keeps the development string short on purpose; see RFP_VERSION there. */
+#define VERSION_COLS            12
+
+_Static_assert(sizeof RFP_VERSION - 1 <= VERSION_COLS,
+               "RFP_VERSION is too long for the mode menu's version slot");
+
 /* ------------------------------------------------------------------- USB */
 
 /* 0x2E8A is Raspberry Pi's vendor ID; 0x000A is their reserved range for a

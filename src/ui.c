@@ -342,7 +342,17 @@ void ui_tick(void) {
     if (menu_open) {
         /* The menu owns the panel while it is up: the operator is choosing,
          * not watching. The current choice is white, the rest grey. */
-        put_bar("MODE", clock, COL_BLACK, COL_BLUE, 0, 0);
+
+        /* The build's version takes the slot the clock has everywhere else.
+         * The menu times itself out in seconds, so there is no job being timed
+         * from it, and it is the one screen the operator is looking at on
+         * purpose rather than glancing at -- which makes it the only place
+         * worth spending on something that never changes.
+         *
+         * Passed as it comes: config.h holds it to what the slot can show, so
+         * there is nothing to truncate here. A version cut down to fit would
+         * read as a different build, which is worse than not showing one. */
+        put_bar("MODE", RFP_VERSION, COL_BLACK, COL_BLUE, 0, 0);
 
         for (int i = 0; i < MODE_COUNT && n < ST7789_BLOCK_LINES; i++) {
             body[n] = (st7789_line_t){ 0 };
