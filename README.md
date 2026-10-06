@@ -57,8 +57,7 @@ It takes effect on the *next* boot, after selecting the mode.
 3) USB-RFP will detect that the RFP has stopped reading `iprfp3G.dnld` and wait 20 seconds.  
 4) It will force the RFP to re-enumerate, and present just the `factoryReset` file  
 5) The RFP will delete the file, factory reset and then reboot  
-6) Once power is restored USB-RFP remembers the last stage, and displays  
-**DONE**  
+6) Once power is restored USB-RFP remembers the last stage, and displays **DONE**  
 7) On the _next_ power cycle, it'll start again from #1
 
 ### Upgrade Mode
@@ -79,15 +78,13 @@ It takes effect on the *next* boot, after selecting the mode.
 
 ## Building
 
-Both variants, in Docker, which is exactly what the release workflow does:
-
 ```sh
 docker build -t rfp-usb-build .
 docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/src" rfp-usb-build \
     tools/build-firmware.sh
 ```
 
-That leaves `build/rfp-usb-2040.uf2` and `build/rfp-usb-2350.uf2`. Pass `2040` or `2350` to the script to build just one. To build against your own SDK instead, set `PICO_SDK_PATH` and run the same script.
+This will output `build/rfp-usb-2040.uf2` and `build/rfp-usb-2350.uf2`. Pass `2040` or `2350` to the script to build a specific image.
 
 ## Screen Renders
 
