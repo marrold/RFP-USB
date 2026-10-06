@@ -1,7 +1,7 @@
 
 # RFP-USB
 
-Firmware for the Waveshare RP2040-GEEK and RP2350-GEEK to turn either into a tool for recovering, resetting and upgrading 3rd Gen Mitel DECT RFPs, like the RFP 35.
+Firmware for the Waveshare RP2040-GEEK and RP2350-GEEK to turn either into a tool for recovering, resetting and upgrading 3rd Gen Mitel DECT RFPs, including the 35 and 43.
 
 **Disclaimer:** RFP-USB has been developed with AI, but meticulously tested by a human.  
 
