@@ -32,7 +32,7 @@ RFP-USB attempts to streamline this process by tracking the state (as best it ca
 
 ## Installing / Upgrading
 
-1) Grab the latest `.uf2` *release* from GitHub  
+1) Grab the latest `.uf2` from the [GitHub releases page](https://github.com/marrold/RFP-USB/releases)
 2) Insert the RP2040-GEEK into the computer whilst pressing and holding the BOOT button, and keep it held for a few seconds.  
 3) It should then present itself as USB Mass Storage  
 4) Drop the `.uf2` file onto the USB. It will reboot automatically and start running the RFP-USB firmware
